@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Verse;
 using Verse.AI;
+using static UnityEngine.GraphicsBuffer;
 
 namespace HediffsWhileJob {
     [StaticConstructorOnStartup]
@@ -44,15 +45,32 @@ namespace HediffsWhileJob {
                     healthTracker.RemoveHediff(hediff);
                 }
             } else {
+                Hediff hediff;
+                HediffComp_Disappears hediffComp_Disappears;
+                /*
                 if (healthTracker.hediffSet.HasHediff(ext.hediffDef)) {
+                    return;
+                }
+                */
+                if (healthTracker.hediffSet.TryGetHediff(ext.hediffDef, out hediff)) {
+                    hediffComp_Disappears = hediff.TryGetComp<HediffComp_Disappears>();
+                    if (hediffComp_Disappears != null) {
+                        hediffComp_Disappears.ticksToDisappear = 60;
+                    }
                     return;
                 }
                 BodyPartRecord record = null;
                 if (ext.bodyPartDef != null) {
                     healthTracker.hediffSet.GetBodyPartRecord(ext.bodyPartDef);
                 }
-                var hediff = HediffMaker.MakeHediff(ext.hediffDef, __instance.pawn, record);
-                hediff.Severity = ext.severity;
+                hediff = HediffMaker.MakeHediff(ext.hediffDef, __instance.pawn, record);
+                if (ext.severity >= 0) {
+                    hediff.Severity = ext.severity;
+                }
+                hediffComp_Disappears = hediff.TryGetComp<HediffComp_Disappears>();
+                if (hediffComp_Disappears != null) {
+                    hediffComp_Disappears.ticksToDisappear = 60;
+                }
                 healthTracker.AddHediff(hediff);
 
             }
